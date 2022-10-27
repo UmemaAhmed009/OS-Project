@@ -4,7 +4,8 @@ public class driverFile{
     public static byte[] mainMemory = new byte[65536];
     public static void main(String[] args) throws IOException{
         int i = 1; //temporary variable
-        
+        System.out.println("Hello World!");
+        System.out.println("Hello Aiza!");
         //Program Loading
         try {
             File Program = new File("E:\\5th Semester\\OS\\demoFiles\\flags");
@@ -71,5 +72,6 @@ public class driverFile{
         
 
     }
+    
 
 }
