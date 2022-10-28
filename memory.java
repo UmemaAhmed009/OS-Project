@@ -12,11 +12,11 @@ import java.lang.Short;
             byte[] mem = new byte[65536];
 
             // all the gpr registers are stored in it
-            register[] reg_array = new register[16];
+            register[] gpr_array = new register[16];
             //initialzing gpr registers
-            for (int m =0; m<reg_array.length; m++)
+            for (int m =0; m<gpr_array.length; m++)
             {
-                reg_array[m] = new register();
+                gpr_array[m] = new register();
             }
             // all the spr registers are stored in it
             register[] spr_array = new register[16];
@@ -111,16 +111,16 @@ import java.lang.Short;
                 if ((opcode >= 16 && opcode<=19)|| (opcode >= 26 && opcode <= 28)) {
                     switch (opcode) {
                         case 16:
-                            reg_array[mem[j+1]].values = reg_array[mem[j+1]].MOV(reg_array[mem[j+1]],reg_array[mem[j+2]]);
+                            gpr_array[mem[j+1]].values = gpr_array[mem[j+1]].MOV(gpr_array[mem[j+1]],gpr_array[mem[j+2]]);
                             PC.values = PC.ADD_PC(PC, 3);
                             break;
                         case 17:
                             // r1 ke value is changing here =r1(calling add ka function and passing r1,r2 as paramerters
-                            reg_array[mem[j+1]].values = reg_array[mem[j+1]].ADD(reg_array[mem[j+1]],reg_array[mem[j+2]]);
+                            gpr_array[mem[j+1]].values = gpr_array[mem[j+1]].ADD(gpr_array[mem[j+1]],gpr_array[mem[j+2]]);
                             PC.values = PC.ADD_PC(PC, 3);
                             break;
                         case 18:
-                            reg_array[mem[j+1]].values = reg_array[mem[j+1]].SUBTRACT(reg_array[mem[j+1]],reg_array[mem[j+2]]);
+                            gpr_array[mem[j+1]].values = gpr_array[mem[j+1]].SUBTRACT(gpr_array[mem[j+1]],gpr_array[mem[j+2]]);
                             PC.values = PC.ADD_PC(PC, 3);
                             break;
                         case 19:
@@ -130,20 +130,20 @@ import java.lang.Short;
                             System.out.println("The index is: "+ index);
                             //short product = (short) (mem[PC.values+2]mem[PC.values+3]);
                             //System.out.println("The product is: "+ product);
-                            reg_array[index].values = reg_array[index].MULTIPLY(reg_array[index],reg_array[index +1]);
-                            System.out.println("The value of MUL instruction is: " + reg_array[index].values);
+                            gpr_array[index].values = gpr_array[index].MULTIPLY(gpr_array[index],gpr_array[index +1]);
+                            System.out.println("The value of MUL instruction is: " + gpr_array[index].values);
                             PC.values = PC.ADD_PC(PC, 3);
                             break;
                         case 26:
-                            reg_array[mem[j+1]].values = reg_array[mem[j+1]].DIV(reg_array[mem[j+1]],reg_array[mem[j+2]]);
+                            gpr_array[mem[j+1]].values = gpr_array[mem[j+1]].DIV(gpr_array[mem[j+1]],gpr_array[mem[j+2]]);
                             PC.values = PC.ADD_PC(PC, 3);
                             break;
                         case 27:
-                            reg_array[mem[j+1]].values = reg_array[mem[j+1]].LogicAND(reg_array[mem[j+1]],reg_array[mem[j+2]]);
+                            gpr_array[mem[j+1]].values = gpr_array[mem[j+1]].LogicAND(gpr_array[mem[j+1]],gpr_array[mem[j+2]]);
                             PC.values = PC.ADD_PC(PC, 3);
                             break;
                         case 28:
-                            reg_array[mem[j+1]].values = reg_array[mem[j+1]].LogicOR(reg_array[mem[j+1]],reg_array[mem[j+2]]);
+                            gpr_array[mem[j+1]].values = gpr_array[mem[j+1]].LogicOR(gpr_array[mem[j+1]],gpr_array[mem[j+2]]);
                             PC.values = PC.ADD_PC(PC, 3);
                             break;
                     }
@@ -160,9 +160,9 @@ import java.lang.Short;
                             System.out.println("The Register is: "+ Register);
                             short immediate = (short) (Byte.toUnsignedInt(mem[PC.values+2]) + Byte.toUnsignedInt(mem[PC.values+3]));
                             System.out.println("The immediate is: "+ immediate);
-                            System.out.println("The value of register before instruction is: " + reg_array[Register].values);
-                            reg_array[Register].values = reg_array[Register].MOVI(reg_array[Register],immediate);
-                            System.out.println("The value of register after MOVI instruction is: " + reg_array[Register].values);
+                            System.out.println("The value of register before instruction is: " + gpr_array[Register].values);
+                            gpr_array[Register].values = gpr_array[Register].MOVI(gpr_array[Register],immediate);
+                            System.out.println("The value of register after MOVI instruction is: " + gpr_array[Register].values);
                             PC.values = PC.ADD_PC(PC, 4);
                             break;
                         case 31:
@@ -172,9 +172,9 @@ import java.lang.Short;
                             System.out.println("The Register is: "+ Register);
                             immediate = (short) (mem[PC.values+2]+mem[PC.values+3]);
                             System.out.println("The immediate is: "+ immediate);
-                            System.out.println("The value of register before instruction is: " + reg_array[Register].values);
-                            reg_array[Register].values = reg_array[Register].ADDI(reg_array[Register],immediate);
-                            System.out.println("The value of register after ADDI instruction is: " + reg_array[Register].values);
+                            System.out.println("The value of register before instruction is: " + gpr_array[Register].values);
+                            gpr_array[Register].values = gpr_array[Register].ADDI(gpr_array[Register],immediate);
+                            System.out.println("The value of register after ADDI instruction is: " + gpr_array[Register].values);
                             PC.values = PC.ADD_PC(PC,4);
                             break;
                         case 32:
@@ -184,9 +184,9 @@ import java.lang.Short;
                             System.out.println("The Register is: "+ Register);
                             immediate = (short) (mem[PC.values+2]+mem[PC.values+3]);
                             System.out.println("The immediate is: "+ immediate);
-                            System.out.println("The value of register before instruction is: " + reg_array[Register].values);
-                            reg_array[Register].values = reg_array[Register].SUBI(reg_array[Register],immediate);
-                            System.out.println("The value of register after SUBI instruction is: " + reg_array[Register].values);
+                            System.out.println("The value of register before instruction is: " + gpr_array[Register].values);
+                            gpr_array[Register].values = gpr_array[Register].SUBI(gpr_array[Register],immediate);
+                            System.out.println("The value of register after SUBI instruction is: " + gpr_array[Register].values);
                             PC.values = PC.ADD_PC(PC, 4);
                             break;
                         case 33:
@@ -194,9 +194,9 @@ import java.lang.Short;
                             System.out.println("The Register is: "+ Register);
                             immediate = (short) (mem[PC.values+2]+mem[PC.values+3]);
                             System.out.println("The immediate is: "+ immediate);
-                            System.out.println("The value of register before instruction is: " + reg_array[Register].values);
-                            reg_array[Register].values = reg_array[Register].MULI(reg_array[Register],immediate);
-                            System.out.println("The value of register after MULI instruction is: " + reg_array[Register].values);
+                            System.out.println("The value of register before instruction is: " + gpr_array[Register].values);
+                            gpr_array[Register].values = gpr_array[Register].MULI(gpr_array[Register],immediate);
+                            System.out.println("The value of register after MULI instruction is: " + gpr_array[Register].values);
                             PC.values = PC.ADD_PC(PC, 4);
                             break;
                         case 34:
@@ -204,9 +204,9 @@ import java.lang.Short;
                             System.out.println("The Register is: "+ Register);
                             immediate = (short) (mem[PC.values+2]+mem[PC.values+3]);
                             System.out.println("The immediate is: "+ immediate);
-                            System.out.println("The value of register before instruction is: " + reg_array[Register].values);
-                            reg_array[Register].values = reg_array[Register].DIVI(reg_array[Register],immediate);
-                            System.out.println("The value of register after DIVI instruction is: " + reg_array[Register].values);
+                            System.out.println("The value of register before instruction is: " + gpr_array[Register].values);
+                            gpr_array[Register].values = gpr_array[Register].DIVI(gpr_array[Register],immediate);
+                            System.out.println("The value of register after DIVI instruction is: " + gpr_array[Register].values);
                             PC.values = PC.ADD_PC(PC, 4);
                             break;
                         case 35:
@@ -215,11 +215,11 @@ import java.lang.Short;
                             immediate = (short) (mem[PC.values+2]+mem[PC.values+3]);
                             System.out.println("The immediate is: "+ immediate);
                             //System.out.println("The immediate in binary is: "+ Integer.toBinaryString(immediate));
-                            System.out.println("The value of register before instruction is: " + reg_array[Register].values);
-                            //System.out.println("The value of register before instruction in binary is: " + Integer.toBinaryString(reg_array[Register].values));
-                            reg_array[Register].values = reg_array[Register].ANDI(reg_array[Register],immediate);
-                            System.out.println("The value of register after ANDI instruction is: " + reg_array[Register].values);
-                            //System.out.println("The value of register after ANDI instruction in binary is: " + Integer.toBinaryString(reg_array[Register].values));
+                            System.out.println("The value of register before instruction is: " + gpr_array[Register].values);
+                            //System.out.println("The value of register before instruction in binary is: " + Integer.toBinaryString(gpr_array[Register].values));
+                            gpr_array[Register].values = gpr_array[Register].ANDI(gpr_array[Register],immediate);
+                            System.out.println("The value of register after ANDI instruction is: " + gpr_array[Register].values);
+                            //System.out.println("The value of register after ANDI instruction in binary is: " + Integer.toBinaryString(gpr_array[Register].values));
                             PC.values = PC.ADD_PC(PC, 4);
                             break;
                         case 36:
@@ -228,11 +228,11 @@ import java.lang.Short;
                             immediate = (short) (mem[PC.values+2]+mem[PC.values+3]);
                             System.out.println("The immediate is: "+ immediate);
                             //System.out.println("The immediate in binary is: "+ Integer.toBinaryString(immediate));
-                            System.out.println("The value of register before instruction is: " + reg_array[Register].values);
-                            //System.out.println("The value of register before instruction in binary is: " + Integer.toBinaryString(reg_array[Register].values));
-                            reg_array[Register].values = reg_array[Register].ORI(reg_array[Register],immediate);
-                            System.out.println("The value of register after ORI instruction is: " + reg_array[Register].values);
-                            //System.out.println("The value of register after ANDI instruction in binary is: " + Integer.toBinaryString(reg_array[Register].values));
+                            System.out.println("The value of register before instruction is: " + gpr_array[Register].values);
+                            //System.out.println("The value of register before instruction in binary is: " + Integer.toBinaryString(gpr_array[Register].values));
+                            gpr_array[Register].values = gpr_array[Register].ORI(gpr_array[Register],immediate);
+                            System.out.println("The value of register after ORI instruction is: " + gpr_array[Register].values);
+                            //System.out.println("The value of register after ANDI instruction in binary is: " + Integer.toBinaryString(gpr_array[Register].values));
                             PC.values = PC.ADD_PC(PC, 4);
                             break;
                         case 37:
@@ -295,11 +295,11 @@ import java.lang.Short;
                             immediate = (short) (mem[PC.values+2]+mem[PC.values+3]);
                             System.out.println("The immediate is: "+ immediate);
                             //System.out.println("The immediate in binary is: "+ Integer.toBinaryString(immediate));
-                            System.out.println("The value of register before instruction is: " + reg_array[Register].values);
-                            //System.out.println("The value of register before instruction in binary is: " + Integer.toBinaryString(reg_array[Register].values));
-                            reg_array[Register].values = reg_array[Register].MOVL(reg_array[Register],mem,(int)immediate);
-                            System.out.println("The value of register after MOVL instruction is: " + reg_array[Register].values);
-                            //System.out.println("The value of register after ANDI instruction in binary is: " + Integer.toBinaryString(reg_array[Register].values));
+                            System.out.println("The value of register before instruction is: " + gpr_array[Register].values);
+                            //System.out.println("The value of register before instruction in binary is: " + Integer.toBinaryString(gpr_array[Register].values));
+                            gpr_array[Register].values = gpr_array[Register].MOVL(gpr_array[Register],mem,(int)immediate);
+                            System.out.println("The value of register after MOVL instruction is: " + gpr_array[Register].values);
+                            //System.out.println("The value of register after ANDI instruction in binary is: " + Integer.toBinaryString(gpr_array[Register].values));
                             PC.values = PC.ADD_PC(PC, 4);
                             break;
                         case 52:
@@ -309,10 +309,10 @@ import java.lang.Short;
                             System.out.println("The immediate is: "+ immediate);
                             //System.out.println("The immediate in binary is: "+ Integer.toBinaryString(immediate));
                             System.out.println("The value of memory before instruction is: " + mem[(int)immediate]);
-                            //System.out.println("The value of register before instruction in binary is: " + Integer.toBinaryString(reg_array[Register].values));
-                            mem[(int)immediate] = reg_array[Register].MOVS(reg_array[Register],mem, (int)immediate);
+                            //System.out.println("The value of register before instruction in binary is: " + Integer.toBinaryString(gpr_array[Register].values));
+                            mem[(int)immediate] = gpr_array[Register].MOVS(gpr_array[Register],mem, (int)immediate);
                             System.out.println("The value of register after MOVS instruction is: " + mem[(int)immediate]);
-                            //System.out.println("The value of register after ANDI instruction in binary is: " + Integer.toBinaryString(reg_array[Register].values));
+                            //System.out.println("The value of register after ANDI instruction in binary is: " + Integer.toBinaryString(gpr_array[Register].values));
                             PC.values = PC.ADD_PC(PC, 4);
                             break;
                     }
@@ -325,74 +325,74 @@ import java.lang.Short;
                         short immediate;
                         Register = (mem[PC.values+1] & 0xFF);//converting byte to int
                         System.out.println("The Register is: "+ Register);
-                        System.out.println("The value of register before instruction is: " + reg_array[Register].values);
-                        //System.out.println("The value of register before instruction in binary is: " + Integer.toBinaryString(reg_array[Register].values));
-                        reg_array[Register].values = reg_array[Register].SHL(reg_array[Register],Reg.flag_register.get(0));
-                        System.out.println("The value of register after SHL instruction is: " + reg_array[Register].values);
-                        //System.out.println("The value of register after ANDI instruction in binary is: " + Integer.toBinaryString(reg_array[Register].values));
+                        System.out.println("The value of register before instruction is: " + gpr_array[Register].values);
+                        //System.out.println("The value of register before instruction in binary is: " + Integer.toBinaryString(gpr_array[Register].values));
+                        gpr_array[Register].values = gpr_array[Register].SHL(gpr_array[Register],Reg.flag_register.get(0));
+                        System.out.println("The value of register after SHL instruction is: " + gpr_array[Register].values);
+                        //System.out.println("The value of register after ANDI instruction in binary is: " + Integer.toBinaryString(gpr_array[Register].values));
                             PC.values = PC.ADD_PC(PC, 4);
                             break;
                         case 72:
                             Register = (mem[PC.values+1] & 0xFF);//converting byte to int
                             System.out.println("The Register is: "+ Register);
-                            System.out.println("The value of register before instruction is: " + reg_array[Register].values);
-                            //System.out.println("The value of register before instruction in binary is: " + Integer.toBinaryString(reg_array[Register].values));
-                            reg_array[Register].values = reg_array[Register].SHR(reg_array[Register],Reg.flag_register.get(0));
-                            System.out.println("The value of register after SHR instruction is: " + reg_array[Register].values);
+                            System.out.println("The value of register before instruction is: " + gpr_array[Register].values);
+                            //System.out.println("The value of register before instruction in binary is: " + Integer.toBinaryString(gpr_array[Register].values));
+                            gpr_array[Register].values = gpr_array[Register].SHR(gpr_array[Register],Reg.flag_register.get(0));
+                            System.out.println("The value of register after SHR instruction is: " + gpr_array[Register].values);
                             PC.values = PC.ADD_PC(PC, 4);
                             break;
                         case 73:
                             Register = (mem[PC.values+1] & 0xFF);//converting byte to int
                             System.out.println("The Register is: "+ Register);
-                            System.out.println("The value of register before instruction is: " + reg_array[Register].values);
-                            //System.out.println("The value of register before instruction in binary is: " + Integer.toBinaryString(reg_array[Register].values));
-                            reg_array[Register].values = reg_array[Register].SHR(reg_array[Register],Reg.flag_register.get(0));
-                            System.out.println("The value of register after SHR instruction is: " + reg_array[Register].values);
+                            System.out.println("The value of register before instruction is: " + gpr_array[Register].values);
+                            //System.out.println("The value of register before instruction in binary is: " + Integer.toBinaryString(gpr_array[Register].values));
+                            gpr_array[Register].values = gpr_array[Register].SHR(gpr_array[Register],Reg.flag_register.get(0));
+                            System.out.println("The value of register after SHR instruction is: " + gpr_array[Register].values);
                             PC.values = PC.ADD_PC(PC, 4);
                             break;
                         case 74:
                             Register = (mem[PC.values+1] & 0xFF);//converting byte to int
                             System.out.println("The Register is: "+ Register);
-                            System.out.println("The value of register before instruction is: " + reg_array[Register].values);
-                            //System.out.println("The value of register before instruction in binary is: " + Integer.toBinaryString(reg_array[Register].values));
-                            reg_array[Register].values = reg_array[Register].RTL(reg_array[Register],Reg.flag_register.get(0));
-                            System.out.println("The value of register after RTL instruction is: " + reg_array[Register].values);
+                            System.out.println("The value of register before instruction is: " + gpr_array[Register].values);
+                            //System.out.println("The value of register before instruction in binary is: " + Integer.toBinaryString(gpr_array[Register].values));
+                            gpr_array[Register].values = gpr_array[Register].RTL(gpr_array[Register],Reg.flag_register.get(0));
+                            System.out.println("The value of register after RTL instruction is: " + gpr_array[Register].values);
                             PC.values = PC.ADD_PC(PC, 4);
                             break;
                         case 75:
                             Register = (mem[PC.values+1] & 0xFF);//converting byte to int
                             System.out.println("The Register is: "+ Register);
-                            System.out.println("The value of register before instruction is: " + reg_array[Register].values);
-                            //System.out.println("The value of register before instruction in binary is: " + Integer.toBinaryString(reg_array[Register].values));
-                            reg_array[Register].values = reg_array[Register].RTL(reg_array[Register],Reg.flag_register.get(0));
-                            System.out.println("The value of register after RTL instruction is: " + reg_array[Register].values);
+                            System.out.println("The value of register before instruction is: " + gpr_array[Register].values);
+                            //System.out.println("The value of register before instruction in binary is: " + Integer.toBinaryString(gpr_array[Register].values));
+                            gpr_array[Register].values = gpr_array[Register].RTL(gpr_array[Register],Reg.flag_register.get(0));
+                            System.out.println("The value of register after RTL instruction is: " + gpr_array[Register].values);
                             PC.values = PC.ADD_PC(PC, 4);
                             break;
                         case 76:
                             Register = (mem[PC.values+1] & 0xFF);//converting byte to int
                             System.out.println("The Register is: "+ Register);
-                            System.out.println("The value of register before instruction is: " + reg_array[Register].values);
-                            //System.out.println("The value of register before instruction in binary is: " + Integer.toBinaryString(reg_array[Register].values));
-                            reg_array[Register].values = reg_array[Register].RTR(reg_array[Register],Reg.flag_register.get(0));
-                            System.out.println("The value of register after RTR instruction is: " + reg_array[Register].values);
+                            System.out.println("The value of register before instruction is: " + gpr_array[Register].values);
+                            //System.out.println("The value of register before instruction in binary is: " + Integer.toBinaryString(gpr_array[Register].values));
+                            gpr_array[Register].values = gpr_array[Register].RTR(gpr_array[Register],Reg.flag_register.get(0));
+                            System.out.println("The value of register after RTR instruction is: " + gpr_array[Register].values);
                             PC.values = PC.ADD_PC(PC, 4);
                             break;
                         case 77:
                             Register = (mem[PC.values+1] & 0xFF);//converting byte to int
                             System.out.println("The Register is: "+ Register);
-                            System.out.println("The value of register before instruction is: " + reg_array[Register].values);
-                            //System.out.println("The value of register before instruction in binary is: " + Integer.toBinaryString(reg_array[Register].values));
-                            reg_array[Register].values = reg_array[Register].INC(reg_array[Register]);
-                            System.out.println("The value of register after INC instruction is: " + reg_array[Register].values);
+                            System.out.println("The value of register before instruction is: " + gpr_array[Register].values);
+                            //System.out.println("The value of register before instruction in binary is: " + Integer.toBinaryString(gpr_array[Register].values));
+                            gpr_array[Register].values = gpr_array[Register].INC(gpr_array[Register]);
+                            System.out.println("The value of register after INC instruction is: " + gpr_array[Register].values);
                             PC.values = PC.ADD_PC(PC, 4);
                             break;
                         case 78:
                             Register = (mem[PC.values+1] & 0xFF);//converting byte to int
                             System.out.println("The Register is: "+ Register);
-                            System.out.println("The value of register before instruction is: " + reg_array[Register].values);
-                            //System.out.println("The value of register before instruction in binary is: " + Integer.toBinaryString(reg_array[Register].values));
-                            reg_array[Register].values = reg_array[Register].DEC(reg_array[Register]);
-                            System.out.println("The value of register after DEC instruction is: " + reg_array[Register].values);
+                            System.out.println("The value of register before instruction is: " + gpr_array[Register].values);
+                            //System.out.println("The value of register before instruction in binary is: " + Integer.toBinaryString(gpr_array[Register].values));
+                            gpr_array[Register].values = gpr_array[Register].DEC(gpr_array[Register]);
+                            System.out.println("The value of register after DEC instruction is: " + gpr_array[Register].values);
                             PC.values = PC.ADD_PC(PC, 4);
                             break;
                     }
@@ -417,9 +417,9 @@ import java.lang.Short;
                 System.out.println();
             }
             System.out.println("The value of all GPRs after execution of instructions is:");
-            for(int a =0; a<reg_array.length; a++)
+            for(int a =0; a<gpr_array.length; a++)
             {
-                System.out.println("The value of register " + a + " is: "+ (reg_array[a].values));
+                System.out.println("The value of register " + a + " is: "+ (gpr_array[a].values));
             }
             System.out.println("");
 
