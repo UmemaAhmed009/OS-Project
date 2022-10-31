@@ -7,6 +7,7 @@ public class PCB {
     public int data_Size;
     public int code_Size;
     public int process_Size;
+
     register[] gpr_array = new register[16];
     //public int[] Page_Table;
     
