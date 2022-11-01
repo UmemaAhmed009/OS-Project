@@ -1,82 +1,189 @@
 import java.io.*;
+import java.util.PriorityQueue;
 import java.util.Scanner;
 import java.util.Queue;
 import java.util.LinkedList;
 public class driverFile{
     public static byte[] mainMemory = new byte[65536];
     public static byte[] code;
-    public static void main(String[] args) throws IOException{
+    public static void main(String[] args) throws IOException {
         int i = 1; //temporary variable
+        int Que1count = 0;
+        int Que2count = 0;
         int byteRead = 0;
+        Boolean Que2more = false;
+        boolean quantumQ1 = false;
+        int clocktime = 12;
+        int[] arraysort = new int[5];
+        int temp;
+   /*     for (int q = 0; q < 5; q++) {
+            System.out.print("enter number");
+            // Scanner sc = new Scanner(System.in);
+            //
+        }
 
-        /* --Creating PCB for the process-- */
-        PCB PCB = new PCB();
 
-        //Creating Ready Queues
-        Queue<String> Queue_1 = new LinkedList<>();
-        Queue<String> Queue_2 = new LinkedList<>();
+        for(int r=0;r<arraysort.length;r++) {
+            for (int a = r + 1; a < arraysort.length; a++) {
+                if (arraysort[r] > arraysort[a]) {
+                    temp = arraysort[a];
+                    arraysort[a] = arraysort[r];
+                    arraysort[r] = temp;
+
+
+                }
+
+            }
+
+            System.out.print(arraysort[r]);
+
+        }
+
+*/
+        //Creating Ready Queues for CPU scheduling
+        //Queue<String> Queue_1 = new LinkedList<>();
+        //Queue<String> Queue_2 = new LinkedList<>();
+        Queue<PCB> Queue_1 = new LinkedList<>();
+
+        Queue<PCB> Queue_2 = new LinkedList<>();
 
         //Creating Running Queue
-        // Queue<String> Running_Queue = new LinkedList<>();
+
         // if (Running_Queue.isEmpty() == true)
         // {
         //     Running_Queue.add(Program.filename);
         // }
+        //creating running Queue
+        Queue<PCB> Running_Queue = new LinkedList<>();
+        // Running queue normal execution code
+        // we need to treat pcb from que2 >1 differently
+        if (Que2more = true) {
 
+            Running_Queue.add(Queue_2.poll());
+            // execution for one slice time= 8 clock cycles
+            //current state saved in PCB
+            // again sent to ready queue 2
+
+            Queue_2.add(Running_Queue.poll());
+            // state for next process restored
+            Running_Queue.add(Queue_2.poll());
+
+        }
+        {
+            // else execute normally
+
+        }
+
+
+        /* --Creating PCB for the process-- */
+        PCB tempPCB = new PCB(); //temp
+        tempPCB.process_Priority = 0;
+
+        File [] filenames=new File[6];
+        File Folder = new File("D:\\semster5\\os\\DemoFiles");
+        filenames = Folder.listFiles();
         //Program Loading
-        try {
-            File Program = new File("E:\\5th Semester\\OS\\demoFiles\\flags");
-            FileInputStream inStream = new FileInputStream (Program);
-            PCB.process_Filename = Program.getName();
-            //DataInputStream dataInputStr = new DataInputStream(inStream);
-        while((byteRead = inStream.read()) != -1) //checks whether we have reached the end of the file or not
+        for(int f=0; f< filenames.length; f++)
         {
-            //Total memory size = 64 Kb
-
-            /* --Loading Program into memory-- */
-            /* --Storing values in PCB--  */
-            if (i == 1)
-            {
-                PCB.process_Priority = byteRead;
-                System.out.println("The process priority is: " + PCB.process_Priority);
-            }
-            else if(i == 2)
-            {
-                String ID = String.valueOf(byteRead) + String.valueOf(inStream.read());
-                PCB.process_ID = Integer.parseInt(ID);
-                System.out.println("The process ID is: " + PCB.process_ID);
-
-            }
-            else if(i ==3)
-            {
-                String data_size = String.valueOf(byteRead) + String.valueOf(inStream.read());
-                PCB.data_Size= Integer.parseInt(data_size);
-                System.out.println("The process data size is: " + PCB.data_Size);
-            }
- 
-            /* --Adding to the ready queue-- */
-            i++;   
+            System.out.println("The file is: " + filenames[f]);
         }
-        PCB.process_Size = i;
-        System.out.println("The process size is: " + PCB.process_Size);
-        PCB.code_Size = PCB.process_Size - PCB.data_Size - 8;
-        System.out.println("The code size is: " + PCB.code_Size);
-    }catch (FileNotFoundException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
+        for(int counter=0;counter<6;counter++) {
+
+
+            try {
+                FileInputStream inStream = new FileInputStream(filenames[counter]);
+                i=1;
+                PCB PCB = new PCB();
+                PCB.process_Filename = filenames[counter].getName();
+                System.out.println("The filename is: " + PCB.process_Filename);
+                //DataInputStream dataInputStr = new DataInputStream(inStream);
+                while ((byteRead = inStream.read()) != -1) //checks whether we have reached the end of the file or not
+                {
+                    //Total memory size = 64 Kb
+
+                    /* --Loading Program into memory-- */
+                    /* --Storing values in PCB--  */
+                    if (i == 1) {
+                        PCB.process_Priority = byteRead;
+                        System.out.println("The process priority is: " + PCB.process_Priority);
+                    } else if (i == 2) {
+                        String ID = String.valueOf(byteRead) + String.valueOf(inStream.read());
+                        PCB.process_ID = Integer.parseInt(ID);
+                        System.out.println("The process ID is: " + PCB.process_ID);
+
+                    } else if (i == 3) {
+                        String data_size = String.valueOf(byteRead) + String.valueOf(inStream.read());
+                        PCB.data_Size = Integer.parseInt(data_size);
+                        System.out.println("The process data size is: " + PCB.data_Size);
+                    }
+
+                    /* --Adding to the ready queue-- */
+                    i++;
+                }
+                PCB.process_Size = i;
+                System.out.println("The process size is: " + PCB.process_Size);
+                PCB.code_Size = PCB.process_Size - PCB.data_Size - 8;
+                System.out.println("The code size is: " + PCB.code_Size);
+            } catch (FileNotFoundException e) {
+                System.out.println("An error occurred.");
+                e.printStackTrace();
+            }
+            System.out.println();
         }
-        /* Add error handling for priority */
-        if(PCB.process_Priority>=0 && PCB.process_Priority<=15)
-        {
-            Queue_1.add(PCB.process_Filename);
+        /* Add error handling for priority && cpu sceduling
+            for(PCB process : Queue_1){
+        if(PCB.process_Priority>=0 && PCB.process_Priority<=15) {
+            //priority
+            if (Queue_1 == null) {
+                Queue_1.add(PCB);
+            } else if (Queue_1.peek().process_Priority > PCB.process_Priority) {
+                tempPCB = Queue_1.poll();
+                Queue_1.add(PCB);
+                Queue_1.add(tempPCB);
+
+            }
+        }
+            //Queue_1.add(PCB.process_Filename); //PCB is created and added to the ready queue
+            Que1count++;
         }
         else
         {
-            Queue_2.add(PCB.process_Filename);
+            Queue_2.add(PCB);
+            //Queue_2.add(PCB.process_Filename);
+            Que2count++;
+
         }
         System.out.println("Elements of queue 1" + Queue_1);
         System.out.println("Elements of queue 2" + Queue_2);
 
+        //Multilevel Queue Scheduling- Priority scheduling
+
+
+            for (int j = 0; j < Que1count; j++) {
+               if (Queue_1.element().process_Priority>HighPCB.process_Priority);
+                 {
+                     HighPCB=Queue_1.poll();
+                 }
+                    Running_Queue.add(HighPCB);
+                    // we have got the process with highest priority is ready to be executed
+            }
+
+
+        // while loop false i.e Que1=null ; will jump to Queue2
+        // Round Robin '+
+        if (Que2count==1){
+            Running_Queue.add(Queue_2.poll());
+
+        }
+        else if(Que2count>=1){
+            Que2more=true;
+
+        }
         }
 
+
+    // multilevel queue scheduling : priority wise
+    // we will use priority check on the queue using a for loop to check which process has the highest priority and execute it
+*/
+    }
 }
