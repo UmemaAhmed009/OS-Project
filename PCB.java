@@ -11,7 +11,7 @@ public class PCB {
     public int process_Size;
     public register[] gpr_array = new register[16];
     public register[] spr_array = new register[16];
-    //public int[] Page_Table;
+    public int[] Page_Table;
 
     public boolean setProcessPriority(int Priority) throws IOException
     {

@@ -2,11 +2,12 @@ import java.io.*;
 //import java.util.PriorityQueue;
 //import java.util.Scanner;
 import java.util.Queue;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.lang.Math;
 public class driverFile{
     //public static byte[] mainMemory = new byte[65536];
-    public static byte[] code;
+    //public static byte[] code;
     public static void main(String[] args) throws IOException {
         Frames[] MainMemory = new Frames[512]; //Frames is the division of physical memory
         for(int j =0; j < MainMemory.length; j++)
@@ -14,6 +15,7 @@ public class driverFile{
             MainMemory[j] = new Frames();
         }
         int i = 1; //temporary variable
+        register PC = new register();
         int Queue1_count = 0;
         int Queue2_count = 0;
         int byteRead = 0;
@@ -23,6 +25,8 @@ public class driverFile{
         int[] arraysort = new int[6]; //sorted array
 
         int temp; //temporary variable used in sorting
+        int FrameCounter =0;
+        int FrameIndex =0;
 
         //Special-Purpose Registers
         
@@ -100,82 +104,198 @@ public class driverFile{
         }
         System.out.println("");
         boolean boolValue = true;
+        
         /* --Loading Programs into memory in frames-- */
-        for(int counter=0;counter<filenames.length;counter++) {
-            try {
-                FileInputStream inStream = new FileInputStream(filenames[counter]);
+        for(int count=0;count<filenames.length;count++) {
+            //try {
+                FileInputStream inStream = new FileInputStream(filenames[count]);
                 PCB PCB = new PCB();
                 //Creating SPR Registers
                 for(int j=0; j<PCB.spr_array.length; j++)
                 {
                     PCB.spr_array[j] = new register();
                 }
-                PCB.Process = inStream;
-                PCB.process_Filename = filenames[counter].getName();
+                //PCB.Process = inStream;
+                PCB.process_Filename = filenames[count].getName();
                 System.out.println("The filename is: " + PCB.process_Filename);
 
                 PCB.process_Size = inStream.available();
                 System.out.println("The process size is: " + PCB.process_Size);
-                //Calculating the number of pages
-                int PageArrayLength = (int)Math.ceil((double)PCB.process_Size/128);
+
+                int[] NoOfPagesUsed = new int[filenames.length];
+                //Calculating the number of pages/frames
+                int PageArrayLength = (int)Math.ceil((double)(PCB.process_Size+50)/128);
                 System.out.println("The no of pages of this process is: " + PageArrayLength);
                 //Created Array of Pages for the particular process
-                int[] PageArray = new int[PageArrayLength];
-
+                PCB.Page_Table = new int[PageArrayLength];
+                NoOfPagesUsed[count] = PageArrayLength;
+                
                 /* --Storing values in PCB--  */
                 byte[] PCBInfo = new byte[8];
                 inStream.read(PCBInfo);
                 PCB.process_Priority= PCBInfo[0];
                 System.out.println("The process priority is: " + PCB.process_Priority);
                 //Process_ID
-                String ID = String.valueOf(PCBInfo[1]) + String.valueOf(PCBInfo[2]);
-                PCB.process_ID = Integer.parseInt(ID);
+                String ID = String.format("%02d", Integer.parseInt((String.valueOf(PCBInfo[1])))) + String.format("%02d", Integer.parseInt((String.valueOf(PCBInfo[2]))));
+                PCB.process_ID = Integer.parseInt(ID, 16);
                 System.out.println("The process ID is: " + PCB.process_ID);
                 //data size
-                String data_size = String.valueOf(PCBInfo[3]) + String.valueOf(PCBInfo[4]);
-                PCB.data_Size = Integer.parseInt(data_size);
+                String data_size= String.format("%02d", Integer.parseInt((String.valueOf(PCBInfo[3])))) + String.format("%02d", Integer.parseInt((String.valueOf(PCBInfo[4]))));
+                PCB.data_Size = Integer.parseInt(data_size, 16);
                 System.out.println("The process data size is: " + PCB.data_Size);
                 //code size
                 PCB.code_Size = PCB.process_Size - PCB.data_Size - 8;
                 System.out.println("The code size is: " + PCB.code_Size);
                 //Loading data in frames
-                for(int f=0; f<PageArrayLength; f++)
+                int PageCount =0;
+                System.out.println("The Frame Counter is: " + FrameCounter);
+                System.out.println(PCB.Page_Table.length);
+                int StackIndex = 0;
+                for(int f=FrameCounter; f<(PCB.Page_Table.length + FrameCounter); f++)
                 {
+                    StackIndex =0;
+                    //System.out.println("The frame is: " + f);
+                    PCB.Page_Table[PageCount] = FrameIndex;
                     for(int chunk =0; chunk< 128; chunk++)
                     {
                         if((byteRead = inStream.read()) != -1)
                     {
-                        MainMemory[f].add(byteRead,chunk);
+                        MainMemory[f].add((byte)byteRead,chunk);
+                        StackIndex++;
                     }
                     }
-                System.out.println("");
-                System.out.println("New Frame");
+                    //System.out.println("The frame " + f +" of Main Memory is: " + Arrays.toString(MainMemory[f].FrameObj));
+                FrameIndex++;
+                PageCount++;
                 }
+                //Reserving stack size in the memory
+                for(int index =0; index <50; index++)
+                {
+                    if(StackIndex > 127)
+                    {
+                        FrameIndex++;
+                        PCB.Page_Table[PageCount] = FrameIndex;
+                        StackIndex =0;
+                        MainMemory[FrameIndex].add((byte)0,StackIndex);
+                        StackIndex++;
+                    }
+                    else
+                    {
+                        MainMemory[FrameIndex].add((byte)0,StackIndex);
+                        StackIndex++;
+                    }
+                }
+                System.out.println("The Page Table of this process is: " + Arrays.toString(PCB.Page_Table));
+                FrameCounter = FrameCounter + PageCount;
 
                 /* --Segmentation-- */
                 //Data Segmentation
-                PCB.spr_array[0].values = 0; //data base
-                PCB.spr_array[1].values = (short)(0 + PCB.data_Size); //data limit
-                PCB.spr_array[2].values = 0; //data counter
+                PCB.spr_array[3].values = 0; //data base
+                PCB.spr_array[4].values = (short)(PCB.data_Size -1); //data limit
+                PCB.spr_array[5].values = 0; //data counter
                 //Code Segmentation
-                PCB.spr_array[3].values = (short)(PCB.spr_array[1].values +1) ; //code base
-                PCB.spr_array[4].values = (short)(PCB.spr_array[3].values + PCB.code_Size); //code limit
-                PCB.spr_array[5].values = PCB.spr_array[3].values; //code counter
+                //change code base value
+                PCB.spr_array[0].values = (short)(PCB.spr_array[4].values +1) ; //code base
+                PCB.spr_array[1].values = (short)(PCB.spr_array[0].values + PCB.code_Size -1); //code limit
+                PCB.spr_array[2].values = PCB.spr_array[0].values; //code counter
                 //Stack Segmentation
-                PCB.spr_array[6].values = (short)(PCB.spr_array[4].values +1) ; //stack base
-                PCB.spr_array[7].values = (short)(PCB.spr_array[3].values + 50); //code limit
-                PCB.spr_array[8].values = PCB.spr_array[6].values; //stack counter
+                PCB.spr_array[6].values = (short)(PCB.process_Size) ; //stack base
+                PCB.spr_array[8].values = (short)(PCB.spr_array[6].values + 49); //stack limit
+                PCB.spr_array[7].values = PCB.spr_array[6].values; //stack count
 
+                //Program Counter
+                PCB.spr_array[9].values = PCB.spr_array[0].values;
+                PC.values =PCB.spr_array[9].values;
+                //Instruction Register
+
+                int CodeCounter = (int)PCB.spr_array[0].values;
+
+                //Translation
                 /* --Code Execution-- */
+                System.out.println();
+                //PCB.spr_array[0].values = 150;
+                int PageNumber = Math.round(PCB.spr_array[0].values/128);//codebase = PCB.spr_array[0].values
+                int StartFrameNumber = PCB.Page_Table[PageNumber];//Page to Frame Translation
+                int codeBase = (int)PCB.spr_array[0].values - 128*(StartFrameNumber)+1;
+                System.out.println("The Start Frame Number is: " + StartFrameNumber);
+                PageNumber = Math.round(PCB.spr_array[1].values/128);
+                int EndFrameNumber = PCB.Page_Table[PageNumber];
+                System.out.println("The End Frame Number is: " + EndFrameNumber);
+                int codeLimit = PCB.spr_array[1].values - (EndFrameNumber*128)+1;
+                System.out.println("The code base is: " + codeBase);
+                System.out.println("The code limit is: " + codeLimit);
+                //System.out.println("The code size is: " + (289 - 150+1));
                 
-
-                
-
-                    //for printing frames
-                //     if(PCB.process_Filename.equals("noop"))
+                //CodeExecution
+                // int opcode;
+                // if(PCB.process_Filename.equals("flags"))
+                // {
+                //     int k = StartFrameNumber; 
+                //     while(k <= EndFrameNumber)
+                // {
+                //     if(k == EndFrameNumber && codeBase<codeLimit && codeBase< 128)
+                //     {
+                //         /* --Calculating Opcode-- */
+                //         opcode = MainMemory[k].get((int)PC.values);
+                //         String hex_opcode = Integer.toHexString(opcode);//int to hex
+                //         try{
+                //             opcode = Integer.parseUnsignedInt(hex_opcode);//converting hex to unigned int
+                //             //System.out.println("Opcode= " + opcode);
+                //         }
+                //         catch(NumberFormatException e)
                 //         {
-                //             for(int f =0; f<1; f++)
+                //             opcode = MainMemory[k].get((int)PC.values);
+                //         }
+                //         for(int j= codeBase; j<=codeLimit; j++)
                 //         {
+                //             CodeCounter++;
+                //             if (CodeExecution.CheckOpcodeRange(opcode, PCB.gpr_array, PC, MainMemory[k].FrameObj) == true)
+                //         {
+                //             break;
+                //         }
+                //         System.out.println();
+                //         }
+                //     }
+                //     else if(EndFrameNumber > k && codeBase>codeLimit)
+                //     for(int j= codeBase; j<128; j++)
+                //         {
+                //             /* --Calculating Opcode-- */
+                //             opcode = MainMemory[k].get((int)PC.values);
+                //             String hex_opcode = Integer.toHexString(opcode);//int to hex
+                //             try{
+                //                 opcode = Integer.parseUnsignedInt(hex_opcode);//converting hex to unigned int
+                //                 //System.out.println("Opcode= " + opcode);
+                //             }
+                //             catch(NumberFormatException e)
+                //             {
+                //                 opcode = MainMemory[k].get((int)PC.values);
+                //             }
+                //             CodeCounter++;
+                //             if (CodeExecution.CheckOpcodeRange(opcode, PCB.gpr_array, PC, MainMemory[k].FrameObj) == true)
+                //         {
+                //             break;
+                //         }
+                //         }
+                //         codeBase =0;
+                //         k++;
+                //     }
+                // }
+                System.out.println("The value of Code Counter is: " + CodeCounter);
+                //     //for printing frames and pages
+                    if(PCB.process_Filename.equals("flags"))
+                    {
+                        System.out.println("The value of all SPRs after execution of instructions is:");
+                        System.out.print("[");
+                        for(int a =0; a<PCB.spr_array.length; a++)
+                        {
+                            System.out.print(" "+ (PCB.spr_array[a].values & 0xff));
+                        }
+                        System.out.println(" ]");
+                    }
+                //         {
+                //             for(int f =0; f<PCB.spr_array.length; f++)
+                //         {
+                //             System.out.println("The ")
                 //             for(int k=0; k< 128; k++)
                 //         {
                 //             System.out.println("The byte read in page " + f + " at index " + k + " is: " + MainMemory[f].get(k));
@@ -198,11 +318,11 @@ public class driverFile{
 
                     /* --Adding to the ready queue-- */
                 // }
-            }
-            catch (FileNotFoundException e) {
-                System.out.println("An error occurred.");
-                e.printStackTrace();
-            }
+            
+            // } catch (FileNotFoundException e) {
+            //     System.out.println("An error occurred.");
+            //     e.printStackTrace();
+            // }
             System.out.println();
         }
 
@@ -263,3 +383,4 @@ public class driverFile{
 */
     }
 }
+
