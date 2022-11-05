@@ -9,6 +9,7 @@ public class PCB {
     public int data_Size;
     public int code_Size;
     public int process_Size;
+    public boolean que2more=false;
     public register[] gpr_array = new register[16];
     public register[] spr_array = new register[16];
     public int[] Page_Table;
