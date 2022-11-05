@@ -1,14 +1,31 @@
 import java.io.*;
+import net.steppschuh.markdowngenerator.*;
+import net.steppschuh.markdowngenerator.text.Text;
+import net.steppschuh.markdowngenerator.text.emphasis.BoldText;
+import net.steppschuh.markdowngenerator.text.emphasis.ItalicText;
+import net.steppschuh.markdowngenerator.text.emphasis.StrikeThroughText;
+
 //import java.util.PriorityQueue;
 //import java.util.Scanner;
 import java.util.Queue;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.lang.Math;
+
 public class driverFile{
+//     public static void example() throws Exception {
+//         StringBuilder sb = new StringBuilder()
+//                 .append(new Text("I am normal")).append("\n")
+//                 .append(new BoldText("I am bold")).append("\n")
+//                 .append(new ItalicText("I am italic")).append("\n")
+//                 .append(new StrikeThroughText("I am strike-through"));
+    
+//         System.out.println(sb);
+//     }
     //public static byte[] mainMemory = new byte[65536];
     //public static byte[] code;
     public static void main(String[] args) throws IOException {
+        //driverFile.example();
         Frames[] MainMemory = new Frames[512]; //Frames is the division of physical memory
         for(int j =0; j < MainMemory.length; j++)
         {
@@ -141,6 +158,7 @@ public class driverFile{
                 System.out.println("The process ID is: " + PCB.process_ID);
                 //data size
                 String data_size= String.format("%02d", Integer.parseInt((String.valueOf(PCBInfo[3])))) + String.format("%02d", Integer.parseInt((String.valueOf(PCBInfo[4]))));
+                System.out.println("The data size is: "+ data_size);
                 PCB.data_Size = Integer.parseInt(data_size, 16);
                 System.out.println("The process data size is: " + PCB.data_Size);
                 //code size
@@ -195,7 +213,7 @@ public class driverFile{
                 PCB.spr_array[5].values = 0; //data counter
                 //Code Segmentation
                 //change code base value
-                PCB.spr_array[0].values = (short)(PCB.spr_array[4].values +1) ; //code base
+                PCB.spr_array[0].values = (short)(PCB.spr_array[4].values + (1)) ; //code base
                 PCB.spr_array[1].values = (short)(PCB.spr_array[0].values + PCB.code_Size -1); //code limit
                 PCB.spr_array[2].values = PCB.spr_array[0].values; //code counter
                 //Stack Segmentation
@@ -205,81 +223,110 @@ public class driverFile{
 
                 //Program Counter
                 PCB.spr_array[9].values = PCB.spr_array[0].values;
-                PC.values =PCB.spr_array[9].values;
+                PC.values =PCB.spr_array[0].values;
                 //Instruction Register
+                
+                System.out.println("The value of all SPRs after execution of instructions is:");
+                System.out.print("[");
+                for(int a =0; a<PCB.spr_array.length; a++)
+                {
+                    System.out.print(" "+ (PCB.spr_array[a].values)); //short to unsigned short
+                }
+                System.out.println(" ]");
 
-                int CodeCounter = (int)PCB.spr_array[0].values;
+
+                //int CodeCounter = (int)PCB.spr_array[0].values;
+                int CodeCounter = 0;
 
                 //Translation
                 /* --Code Execution-- */
                 System.out.println();
                 //PCB.spr_array[0].values = 150;
                 int PageNumber = Math.round(PCB.spr_array[0].values/128);//codebase = PCB.spr_array[0].values
+                System.out.println("The Page Number is: " + PageNumber);
                 int StartFrameNumber = PCB.Page_Table[PageNumber];//Page to Frame Translation
-                int codeBase = (int)PCB.spr_array[0].values - 128*(StartFrameNumber)+1;
+                //int codeBase = Short.toUnsignedInt((short)(PCB.spr_array[0].values- (128*StartFrameNumber)));
+                int codeBase = (PCB.spr_array[0].values - (128*PageNumber));
                 System.out.println("The Start Frame Number is: " + StartFrameNumber);
                 PageNumber = Math.round(PCB.spr_array[1].values/128);
                 int EndFrameNumber = PCB.Page_Table[PageNumber];
                 System.out.println("The End Frame Number is: " + EndFrameNumber);
-                int codeLimit = PCB.spr_array[1].values - (EndFrameNumber*128)+1;
+                //int codeLimit = Short.toUnsignedInt((short)(PCB.spr_array[1].values - (EndFrameNumber*128) +1));
+                int codeLimit = (PCB.spr_array[1].values -(PageNumber*128)+1);
                 System.out.println("The code base is: " + codeBase);
                 System.out.println("The code limit is: " + codeLimit);
                 //System.out.println("The code size is: " + (289 - 150+1));
                 
                 //CodeExecution
-                // int opcode;
-                // if(PCB.process_Filename.equals("flags"))
-                // {
-                //     int k = StartFrameNumber; 
-                //     while(k <= EndFrameNumber)
-                // {
-                //     if(k == EndFrameNumber && codeBase<codeLimit && codeBase< 128)
-                //     {
-                //         /* --Calculating Opcode-- */
-                //         opcode = MainMemory[k].get((int)PC.values);
-                //         String hex_opcode = Integer.toHexString(opcode);//int to hex
-                //         try{
-                //             opcode = Integer.parseUnsignedInt(hex_opcode);//converting hex to unigned int
-                //             //System.out.println("Opcode= " + opcode);
-                //         }
-                //         catch(NumberFormatException e)
-                //         {
-                //             opcode = MainMemory[k].get((int)PC.values);
-                //         }
-                //         for(int j= codeBase; j<=codeLimit; j++)
-                //         {
-                //             CodeCounter++;
-                //             if (CodeExecution.CheckOpcodeRange(opcode, PCB.gpr_array, PC, MainMemory[k].FrameObj) == true)
-                //         {
-                //             break;
-                //         }
-                //         System.out.println();
-                //         }
-                //     }
-                //     else if(EndFrameNumber > k && codeBase>codeLimit)
-                //     for(int j= codeBase; j<128; j++)
-                //         {
-                //             /* --Calculating Opcode-- */
-                //             opcode = MainMemory[k].get((int)PC.values);
-                //             String hex_opcode = Integer.toHexString(opcode);//int to hex
-                //             try{
-                //                 opcode = Integer.parseUnsignedInt(hex_opcode);//converting hex to unigned int
-                //                 //System.out.println("Opcode= " + opcode);
-                //             }
-                //             catch(NumberFormatException e)
-                //             {
-                //                 opcode = MainMemory[k].get((int)PC.values);
-                //             }
-                //             CodeCounter++;
-                //             if (CodeExecution.CheckOpcodeRange(opcode, PCB.gpr_array, PC, MainMemory[k].FrameObj) == true)
-                //         {
-                //             break;
-                //         }
-                //         }
-                //         codeBase =0;
-                //         k++;
-                //     }
-                // }
+                int opcode;
+                System.out.println("The PC value is: " + PC.values);
+                if(PCB.process_Filename.equals("p5"))
+                {
+                    int k = StartFrameNumber; 
+                    System.out.print("Code: [");
+                    while(k <= EndFrameNumber)
+                {
+                    if(k == EndFrameNumber && codeBase<codeLimit && codeBase< 128)
+                    {
+                    //     /* --Calculating Opcode-- */
+                    //     opcode = MainMemory[k].get((int)PC.values);
+                    //     String hex_opcode = Integer.toHexString(opcode);//int to hex
+                    //     try{
+                    //         opcode = Integer.parseUnsignedInt(hex_opcode);//converting hex to unigned int
+                    //         //System.out.println("Opcode= " + opcode);
+                    //     }
+                    //     catch(NumberFormatException e)
+                    //     {
+                    //         opcode = MainMemory[k].get((int)PC.values);
+                    //     }
+                        for(int j= codeBase; j<codeLimit; j++)
+                        {
+                            //Printing code segment
+                            int num = Byte.toUnsignedInt(MainMemory[k].get(j));
+                            //String num = String.format("%02X", Integer.parseInt(String.valueOf(MainMemory[k].get(j))));
+                            System.out.print(" ");
+                            System.out.printf("%S",Integer.toHexString(num & 0xFF)); //converting unsigned int value to hex
+                            CodeCounter++;
+                        //     if (CodeExecution.CheckOpcodeRange(opcode, PCB.gpr_array, PC, MainMemory[k].FrameObj) == true)
+                        // {
+                    //         break;
+                    //     }
+                    //  System.out.println();
+                       }
+                    }
+                    else if(EndFrameNumber > k)
+                    {
+                        for(int j= codeBase; j<128; j++)
+                        {
+                            //int num = (int)(MainMemory[k].get(j));
+                            int num = Byte.toUnsignedInt(MainMemory[k].get(j));
+                            //String num = String.format("%02X", Integer.parseInt(String.valueOf(MainMemory[k].get(j))));
+                            //System.out.print(" " + Integer.toHexString(num));
+                            System.out.print(" ");
+                            System.out.printf("%S",Integer.toHexString(num & 0xFF)); //converting unsigned int value to hex
+                    //         /* --Calculating Opcode-- */
+                    //         opcode = MainMemory[k].get((int)PC.values);
+                    //         String hex_opcode = Integer.toHexString(opcode);//int to hex
+                    //         try{
+                    //             opcode = Integer.parseUnsignedInt(hex_opcode);//converting hex to unigned int
+                    //             //System.out.println("Opcode= " + opcode);
+                    //         }
+                    //         catch(NumberFormatException e)
+                    //         {
+                    //             opcode = MainMemory[k].get((int)PC.values);
+                    //         }
+                    //         CodeCounter++;
+                    //         if (CodeExecution.CheckOpcodeRange(opcode, PCB.gpr_array, PC, MainMemory[k].FrameObj) == true)
+                    //     {
+                    //         break;
+                    //     }
+                        }
+                    }
+                        //PC.values++;
+                        codeBase =0;
+                        k++;
+                    }
+                    System.out.println(" ]");
                 System.out.println("The value of Code Counter is: " + CodeCounter);
                 //     //for printing frames and pages
                     if(PCB.process_Filename.equals("flags"))
@@ -381,6 +428,8 @@ public class driverFile{
     // multilevel queue scheduling : priority wise
     // we will use priority check on the queue using a for loop to check which process has the highest priority and execute it
 */
+    }
+    
     }
 }
 
